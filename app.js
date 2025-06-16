@@ -1,10 +1,10 @@
-// pwa-profile/app.js
+const BASE = '/pwa';
 
 registerSW();
 
 function registerSW() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js')
+    navigator.serviceWorker.register(`${BASE}/sw.js`)
     .then(() => {
       updateSWStatus('✅ Service Worker terdaftar');
     })

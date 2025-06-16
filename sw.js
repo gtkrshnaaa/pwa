@@ -1,15 +1,14 @@
-// pwa-profile/sw.js
+const BASE = '/pwa';
 
 const CACHE_NAME = 'pwa-revalidate-v1';
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/app.js',
-  '/offline.html'
+  `${BASE}/`,
+  `${BASE}/index.html`,
+  `${BASE}/style.css`,
+  `${BASE}/app.js`,
+  `${BASE}/offline.html`
 ];
 
-// Saat install, cache file penting
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS_TO_CACHE))
@@ -17,7 +16,6 @@ self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
-// Hapus cache lama saat activate
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -31,7 +29,6 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// Fetch: coba dari network, fallback ke cache atau offline
 self.addEventListener('fetch', event => {
   event.respondWith(
     fetch(event.request)
@@ -43,7 +40,7 @@ self.addEventListener('fetch', event => {
       })
       .catch(() => {
         return caches.match(event.request).then(response => {
-          return response || caches.match('/offline.html');
+          return response || caches.match(`${BASE}/offline.html`);
         });
       })
   );
