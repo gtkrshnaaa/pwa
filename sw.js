@@ -6,9 +6,10 @@ const ASSETS_TO_CACHE = [
   '/index.html',
   '/style.css',
   '/app.js',
+  '/offline.html'
 ];
 
-// Saat install, cache file penting dulu
+// Saat install, cache file penting
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS_TO_CACHE))
@@ -16,7 +17,7 @@ self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
-// Saat activate, hapus cache lama biar bersih
+// Hapus cache lama saat activate
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -30,20 +31,20 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// Fetch: coba ambil dari network dulu, kalau gagal fallback ke cache
+// Fetch: coba dari network, fallback ke cache atau offline
 self.addEventListener('fetch', event => {
   event.respondWith(
     fetch(event.request)
       .then(networkResponse => {
-        // Update cache dengan response terbaru
         caches.open(CACHE_NAME).then(cache => {
           cache.put(event.request, networkResponse.clone());
         });
         return networkResponse.clone();
       })
       .catch(() => {
-        // Kalau offline / gagal fetch, fallback ke cache
-        return caches.match(event.request);
+        return caches.match(event.request).then(response => {
+          return response || caches.match('/offline.html');
+        });
       })
   );
 });
